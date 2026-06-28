@@ -4,20 +4,17 @@ ScreenManager Screens;
 
 void ScreenManager::begin()
 {
+    current = &boot;
 
+    current->begin();
 }
 
 void ScreenManager::update()
 {
+    if(current == nullptr)
+        return;
 
-}
+    current->update();
 
-void ScreenManager::set(Screen screen)
-{
-    currentScreen = screen;
-}
-
-Screen ScreenManager::current() const
-{
-    return currentScreen;
+    current->draw();
 }

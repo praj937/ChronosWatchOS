@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "boot_screen.h"
 
 class ScreenManager
 {
@@ -10,14 +10,11 @@ public:
 
     void update();
 
-    void set(Screen screen);
-
-    Screen current() const;
-
 private:
 
-    Screen currentScreen = Screen::Boot;
+    BootScreen boot;
 
+    IScreen* current = nullptr;
 };
 
 extern ScreenManager Screens;

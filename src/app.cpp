@@ -10,8 +10,6 @@ void App::begin()
     Phone.begin();
 
     Screens.begin();
-
-    Screens.set(Screen::Boot);
 }
 
 void App::update()
