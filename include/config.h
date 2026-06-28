@@ -2,37 +2,23 @@
 
 #include <Arduino.h>
 
-//=========================
-// OLED
-//=========================
+namespace Config
+{
+    // Display
+    constexpr uint16_t DISPLAY_WIDTH  = 128;
+    constexpr uint16_t DISPLAY_HEIGHT = 64;
 
-constexpr uint8_t OLED_SDA = 8;
-constexpr uint8_t OLED_SCL = 9;
+    // OLED Pins
+    constexpr uint8_t OLED_SDA = 8;
+    constexpr uint8_t OLED_SCL = 9;
 
-constexpr uint32_t OLED_I2C_SPEED = 400000;
+    // I2C
+    constexpr uint32_t I2C_SPEED = 400000;
 
-//=========================
-// Display
-//=========================
+    // BLE
+    constexpr char WATCH_NAME[] = "ChronosWatch";
 
-constexpr uint16_t DISPLAY_WIDTH = 128;
-constexpr uint16_t DISPLAY_HEIGHT = 64;
-
-//=========================
-// BLE
-//=========================
-
-constexpr char WATCH_NAME[] = "ChronosWatch";
-
-//=========================
-// Refresh
-//=========================
-
-constexpr uint16_t CLOCK_REFRESH = 1000;
-constexpr uint16_t BATTERY_REFRESH = 30000;
-
-//=========================
-// UI
-//=========================
-
-constexpr uint8_t STATUSBAR_HEIGHT = 10;
+    // Refresh
+    constexpr uint32_t CLOCK_REFRESH_MS   = 1000;
+    constexpr uint32_t BATTERY_REFRESH_MS = 30000;
+}

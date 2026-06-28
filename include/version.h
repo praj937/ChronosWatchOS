@@ -1,5 +1,8 @@
 #pragma once
 
-#define FW_NAME        "ChronosWatchOS"
-#define FW_VERSION     "0.1.0"
-#define FW_AUTHOR      "Prajwal Hiremath"
+namespace Version
+{
+    constexpr char NAME[]    = "ChronosWatchOS";
+    constexpr char NUMBER[]  = "0.1.0";
+    constexpr char AUTHOR[]  = "Prajwal Hiremath";
+}
