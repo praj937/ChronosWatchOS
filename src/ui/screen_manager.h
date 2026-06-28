@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-
+#include "navigation_screen.h"
 #include "boot_screen.h"
 #include "connecting_screen.h"
 #include "home_screen.h"
@@ -10,7 +10,8 @@ enum class ScreenState
 {
     BOOT,
     CONNECTING,
-    HOME
+    HOME,
+    NAVIGATION
 };
 
 class ScreenManager
@@ -32,6 +33,7 @@ private:
     BootScreen boot;
     ConnectingScreen connecting;
     HomeScreen home;
+    NavigationScreen navigation;
 
     IScreen* current = nullptr;
 };

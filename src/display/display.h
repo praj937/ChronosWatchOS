@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <U8g2lib.h>
+
 #include "fonts.h"
 
 class DisplayManager
@@ -15,7 +16,7 @@ public:
     void present();
 
     //-------------------------
-    // Font
+    // Fonts
     //-------------------------
 
     void setFont(Font font);
@@ -28,18 +29,28 @@ public:
         int x,
         int y,
         const char* text);
-    void drawBitmap(
-    int x,
-    int y,
-    int width,
-    int height,
-    const uint8_t* bitmap);
 
     void drawCentered(
         int y,
         Font font,
         const char* text);
 
+    //-------------------------
+    // Bitmap
+    //-------------------------
+
+    void drawBitmap(
+        int x,
+        int y,
+        int width,
+        int height,
+        const uint8_t* bitmap);
+
+    // New
+    void drawNavigationBitmap(
+        int x,
+        int y,
+        const uint8_t* bitmap);
     //-------------------------
     // Widgets
     //-------------------------

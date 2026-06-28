@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include <Arduino.h>
+#include <cstring>
 
 ChronosPhoneService::ChronosPhoneService()
     : watch(WatchConfig::WATCH_NAME)
@@ -50,6 +51,67 @@ uint8_t ChronosPhoneService::phoneBattery()
 
 NavigationData ChronosPhoneService::navigation()
 {
+    Navigation nav = watch.getNavigation();
+
+    // ---------- DEBUG ----------
+    if (nav.active)
+    {
+        Serial.println();
+        Serial.println("========== NAVIGATION ==========");
+
+        Serial.print("Distance   : ");
+        Serial.println(nav.distance);
+
+        Serial.print("Title      : ");
+        Serial.println(nav.title);
+
+        Serial.print("Directions : ");
+        Serial.println(nav.directions);
+
+        Serial.print("Duration   : ");
+        Serial.println(nav.duration);
+
+        Serial.print("ETA        : ");
+        Serial.println(nav.eta);
+
+        Serial.print("Has Icon   : ");
+        Serial.println(nav.hasIcon);
+
+        Serial.println("===============================");
+    }
+
+    navData.active = nav.active;
+    navData.hasIcon = nav.hasIcon;
+
+    strncpy(
+    navData.distance,
+    nav.title.c_str(),
+    sizeof(navData.distance) - 1);
+
+    navData.distance[sizeof(navData.distance) - 1] = '\0';
+
+    strncpy(
+        navData.remaining,
+        nav.duration.c_str(),
+        sizeof(navData.remaining) - 1);
+
+    navData.remaining[sizeof(navData.remaining) - 1] = '\0';
+
+    strncpy(
+        navData.road,
+        nav.directions.c_str(),
+        sizeof(navData.road) - 1);
+
+    navData.road[sizeof(navData.road) - 1] = '\0';
+
+    if (nav.hasIcon)
+    {
+        memcpy(
+            navData.icon,
+            nav.icon,
+            sizeof(navData.icon));
+    }
+
     return navData;
 }
 
@@ -57,6 +119,7 @@ CallData ChronosPhoneService::call()
 {
     return callData;
 }
+
 const char* ChronosPhoneService::timeString()
 {
     sprintf(

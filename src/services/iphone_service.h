@@ -6,11 +6,15 @@ struct NavigationData
 {
     bool active = false;
 
+    bool hasIcon = false;
+
     char distance[16] = "";
 
     char remaining[16] = "";
 
     char road[64] = "";
+
+    uint8_t icon[288];
 };
 
 struct CallData

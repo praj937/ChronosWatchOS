@@ -76,6 +76,67 @@ void DisplayManager::drawBitmap(
         bitmap);
 }
 
+void DisplayManager::drawNavigationBitmap(
+    int x,
+    int y,
+    const uint8_t* bitmap)
+{
+    // Find bounding box of non-empty pixels
+
+    int minX = 48;
+    int minY = 48;
+    int maxX = 0;
+    int maxY = 0;
+
+    for(int yy = 0; yy < 48; yy++)
+    {
+        for(int xx = 0; xx < 48; xx++)
+        {
+            int byteIndex = xx + (yy / 8) * 48;
+
+            bool pixel =
+                bitmap[byteIndex] &
+                (1 << (yy & 7));
+
+            if(pixel)
+            {
+                if(xx < minX) minX = xx;
+                if(xx > maxX) maxX = xx;
+
+                if(yy < minY) minY = yy;
+                if(yy > maxY) maxY = yy;
+            }
+        }
+    }
+
+    int cropWidth  = maxX - minX + 1;
+    int cropHeight = maxY - minY + 1;
+
+    int offsetX = (48 - cropWidth) / 2;
+    int offsetY = (48 - cropHeight) / 2;
+
+    for(int yy = minY; yy <= maxY; yy++)
+    {
+        for(int xx = minX; xx <= maxX; xx++)
+        {
+            int byteIndex = xx + (yy / 8) * 48;
+
+            bool pixel =
+                bitmap[byteIndex] &
+                (1 << (yy & 7));
+
+            if(pixel)
+            {
+                oled.drawPixel(
+                    x + offsetX + xx - minX,
+                    y + offsetY + yy - minY);
+            }
+        }
+    }
+}
+
+
+
 void DisplayManager::drawCentered(
     int y,
     Font font,
