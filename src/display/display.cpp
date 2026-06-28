@@ -61,6 +61,20 @@ void DisplayManager::drawText(
 {
     oled.drawStr(x,y,text);
 }
+void DisplayManager::drawBitmap(
+    int x,
+    int y,
+    int width,
+    int height,
+    const uint8_t* bitmap)
+{
+    oled.drawXBM(
+        x,
+        y,
+        width,
+        height,
+        bitmap);
+}
 
 void DisplayManager::drawCentered(
     int y,

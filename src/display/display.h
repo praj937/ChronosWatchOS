@@ -28,6 +28,12 @@ public:
         int x,
         int y,
         const char* text);
+    void drawBitmap(
+    int x,
+    int y,
+    int width,
+    int height,
+    const uint8_t* bitmap);
 
     void drawCentered(
         int y,

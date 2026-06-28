@@ -57,3 +57,31 @@ CallData ChronosPhoneService::call()
 {
     return callData;
 }
+const char* ChronosPhoneService::timeString()
+{
+    sprintf(
+        timeBuffer,
+        "%02d:%02d",
+        watch.getHour(),
+        watch.getMinute());
+
+    return timeBuffer;
+}
+
+const char* ChronosPhoneService::dayString()
+{
+    static const char* days[] =
+    {
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    };
+
+    strcpy(dayBuffer, days[watch.getDayofWeek()]);
+
+    return dayBuffer;
+}

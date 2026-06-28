@@ -18,6 +18,10 @@ public:
 
     uint8_t phoneBattery() override;
 
+    const char* timeString() override;
+
+    const char* dayString() override;
+
     NavigationData navigation() override;
 
     CallData call() override;
@@ -29,4 +33,8 @@ private:
     NavigationData navData;
 
     CallData callData;
+
+    char timeBuffer[6];
+
+    char dayBuffer[12];
 };
