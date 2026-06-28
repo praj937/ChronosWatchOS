@@ -9,8 +9,8 @@ DisplayManager Display;
 
 void DisplayManager::begin()
 {
-    Wire.begin(Config::OLED_SDA, Config::OLED_SCL);
-    Wire.setClock(Config::I2C_SPEED);
+    Wire.begin(WatchConfig::OLED_SDA, WatchConfig::OLED_SCL);
+    Wire.setClock(WatchConfig::I2C_SPEED);
 
     oled.begin();
 
@@ -70,8 +70,9 @@ void DisplayManager::drawCentered(
     setFont(font);
 
     int width = oled.getStrWidth(text);
+    
 
-    int x = (Config::DISPLAY_WIDTH - width) / 2;
+    int x = (WatchConfig::DISPLAY_WIDTH - width) / 2;
 
     oled.drawStr(x,y,text);
 }

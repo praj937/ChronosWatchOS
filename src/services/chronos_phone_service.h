@@ -1,10 +1,14 @@
 #pragma once
 
+#include <ChronosESP32.h>
+
 #include "iphone_service.h"
 
 class ChronosPhoneService : public IPhoneService
 {
 public:
+
+    ChronosPhoneService();
 
     void begin() override;
 
@@ -20,12 +24,9 @@ public:
 
 private:
 
-    uint8_t battery = 100;
+    ChronosESP32 watch;
 
-    bool isConnected = false;
+    NavigationData navData;
 
-    NavigationData nav;
-
-    CallData callInfo;
-
+    CallData callData;
 };
