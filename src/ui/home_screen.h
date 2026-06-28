@@ -2,7 +2,7 @@
 
 #include "iscreen.h"
 
-class BootScreen : public IScreen
+class HomeScreen : public IScreen
 {
 public:
     void begin() override;

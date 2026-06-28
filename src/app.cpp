@@ -16,5 +16,5 @@ void App::update()
 {
     Phone.update();
 
-    Screens.update();
+    Screens.update(Phone.connected());
 }
