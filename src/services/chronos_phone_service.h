@@ -13,6 +13,7 @@ public:
     uint8_t phoneBattery() override;
     const char* timeString() override;
     const char* dayString() override;
+    const char* dateString() override;
     const NavigationData& navigation() override;
     const CallData& call() const override { return callData; }
     const NotificationData& notification() const override { return notificationData; }
@@ -34,4 +35,5 @@ private:
     MusicData musicData{};
     char timeBuffer[6]{};
     char dayBuffer[12]{};
+    char dateBuffer[20]{};
 };

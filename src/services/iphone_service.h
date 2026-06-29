@@ -45,6 +45,7 @@ public:
     virtual uint8_t phoneBattery() = 0;
     virtual const char* timeString() = 0;
     virtual const char* dayString() = 0;
+    virtual const char* dateString() = 0;
     virtual const NavigationData& navigation() = 0;
     virtual const CallData& call() const = 0;
     virtual const NotificationData& notification() const = 0;

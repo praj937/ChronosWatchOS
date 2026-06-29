@@ -34,4 +34,9 @@ private:
     uint32_t lastFrameAt = 0;
     uint32_t fingerprint = 0;
     bool dirty = true;
+    uint16_t roadOffset = 0;
+uint32_t roadScrollTimer = 0;
+uint32_t notificationUntil = 0;
+uint32_t callUntil = 0;
 };
+

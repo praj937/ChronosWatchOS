@@ -21,11 +21,42 @@ void ChronosPhoneService::begin()
 void ChronosPhoneService::update()
 {
     watch.loop();
-    const uint32_t now = millis();
-    if (callData.active && now - callData.receivedAt >= WatchConfig::CALL_DURATION_MS) callData.active = false;
-    if (notificationData.active && now - notificationData.receivedAt >= WatchConfig::NOTIFICATION_DURATION_MS) notificationData.active = false;
-}
 
+    const uint32_t now = millis();
+
+    // Clear event flags shortly after receiving them.
+    // The UI keeps the screen visible for CALL_DURATION_MS /
+    // NOTIFICATION_DURATION_MS using callUntil/notificationUntil.
+    if (callData.active &&
+        now - callData.receivedAt >= 500)
+    {
+        callData.active = false;
+    }
+
+    if (notificationData.active &&
+        now - notificationData.receivedAt >= 500)
+    {
+        notificationData.active = false;
+    }
+
+    // Debug (remove after testing)
+    static uint32_t lastPrint = 0;
+
+    if (millis() - lastPrint > 2000)
+    {
+        lastPrint = millis();
+
+        Navigation nav = watch.getNavigation();
+
+        Serial.printf(
+            "BLE=%d Nav=%d isNav=%d Dist='%s' Dir='%s'\n",
+            watch.isConnected(),
+            nav.active,
+            nav.isNavigation,
+            nav.distance.c_str(),
+            nav.directions.c_str());
+    }
+}
 bool ChronosPhoneService::connected()
 {
     return watch.isConnected();
@@ -55,6 +86,7 @@ void ChronosPhoneService::ringerCallback(String caller, bool active)
     instance->callData.active = active;
     instance->callData.receivedAt = millis();
     copy(instance->callData.caller, sizeof(instance->callData.caller), caller);
+    Serial.println("Ringer callback");
 }
 
 void ChronosPhoneService::notificationCallback(Notification notification)
@@ -67,6 +99,7 @@ void ChronosPhoneService::notificationCallback(Notification notification)
     copy(data.app, sizeof(data.app), notification.app);
     copy(data.title, sizeof(data.title), notification.title);
     copy(data.message, sizeof(data.message), notification.message);
+    Serial.println("Notification callback");
 }
 
 Maneuver ChronosPhoneService::classify(const char* instruction)
@@ -112,4 +145,27 @@ const char* ChronosPhoneService::dayString()
     const uint8_t day = watch.getDayofWeek();
     strncpy(dayBuffer, days[day < 7 ? day : 0], sizeof(dayBuffer) - 1);
     return dayBuffer;
+}
+const char* ChronosPhoneService::dateString()
+{
+    static const char* months[] =
+    {
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    };
+
+    int month = watch.getMonth();
+
+    // If Chronos returns 0-11, convert to 1-12
+    if (month >= 0 && month <= 11)
+        month++;
+
+    snprintf(
+        dateBuffer,
+        sizeof(dateBuffer),
+        "%02d %s",
+        watch.getDay(),
+        months[month - 1]);
+
+    return dateBuffer;
 }

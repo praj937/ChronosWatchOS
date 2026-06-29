@@ -17,8 +17,8 @@ namespace WatchConfig
     constexpr uint32_t CLOCK_REFRESH_MS = 1000;
     constexpr uint32_t BATTERY_REFRESH_MS = 30000;
     constexpr uint32_t BOOT_DURATION_MS = 1000;
-    constexpr uint32_t CALL_DURATION_MS = 3000;
-    constexpr uint32_t NOTIFICATION_DURATION_MS = 2000;
+    constexpr uint32_t CALL_DURATION_MS = 10000;
+    constexpr uint32_t NOTIFICATION_DURATION_MS = 10000;
     constexpr uint32_t FRAME_INTERVAL_MS = 80;
 
     constexpr bool DEBUG_MODE = true;

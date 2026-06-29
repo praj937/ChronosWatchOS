@@ -22,15 +22,55 @@ void UiManager::begin()
     current = ScreenId::Boot;
     dirty = true;
 }
-
 ScreenId UiManager::selectScreen() const
 {
-    if (millis() - bootAt < WatchConfig::BOOT_DURATION_MS) return ScreenId::Boot;
-    if (phone.call().active) return ScreenId::Call;
-    if (phone.navigation().active) return ScreenId::Navigation;
-    if (phone.notification().active) return ScreenId::Notification;
-    if (phone.music().active) return ScreenId::Music;
-    return phone.connected() ? ScreenId::Home : ScreenId::Connecting;
+    const uint32_t now = millis();
+
+    if (now - bootAt < WatchConfig::BOOT_DURATION_MS)
+        return ScreenId::Boot;
+
+    // -----------------------------
+    // CALL (Highest Priority)
+    // -----------------------------
+    if (phone.call().active)
+    {
+        const_cast<UiManager*>(this)->callUntil =
+            now + WatchConfig::CALL_DURATION_MS;
+    }
+
+    if (now < callUntil)
+        return ScreenId::Call;
+
+    // -----------------------------
+    // NOTIFICATION
+    // -----------------------------
+    if (phone.notification().active)
+    {
+        const_cast<UiManager*>(this)->notificationUntil =
+            now + WatchConfig::NOTIFICATION_DURATION_MS;
+    }
+
+    if (now < notificationUntil)
+        return ScreenId::Notification;
+
+    // -----------------------------
+    // NAVIGATION
+    // -----------------------------
+    if (phone.navigation().active)
+        return ScreenId::Navigation;
+
+    // -----------------------------
+    // MUSIC
+    // -----------------------------
+    if (phone.music().active)
+        return ScreenId::Music;
+
+    // -----------------------------
+    // HOME / CONNECTING
+    // -----------------------------
+    return phone.connected()
+           ? ScreenId::Home
+           : ScreenId::Connecting;
 }
 
 void UiManager::update()
@@ -49,8 +89,12 @@ void UiManager::update()
     next = hashText(next, phone.notification().message);
     next = hashText(next, phone.call().caller);
     next ^= phone.phoneBattery();
-    if (!dirty && next == fingerprint) return;
-    fingerprint = next;
+    if (current != ScreenId::Navigation)
+{
+    if (!dirty && next == fingerprint)
+        return;
+}
+     fingerprint = next;
     render(current);
     dirty = false;
     lastFrameAt = now;
@@ -83,9 +127,9 @@ void UiManager::drawBluetooth(int16_t x, int16_t y, bool connected)
 
 void UiManager::drawBattery(int16_t x, int16_t y, uint8_t percent)
 {
-    Display.frame(x, y, 19, 9); Display.box(x + 19, y + 2, 2, 5);
-    const uint8_t fill = static_cast<uint8_t>((percent > 100 ? 100 : percent) * 17 / 100);
-    if (fill) Display.box(x + 1, y + 1, fill, 7);
+    Display.frame(x, y, 16, 8); Display.box(x + 16, y + 2, 2, 4);
+    const uint8_t fill = static_cast<uint8_t>((percent > 100 ? 100 : percent) * 14 / 100);
+    if (fill) Display.box(x + 1, y + 1, fill, 6);
 }
 
 void UiManager::drawBoot()
@@ -106,10 +150,23 @@ void UiManager::drawConnecting()
 void UiManager::drawHome()
 {
     drawBluetooth(3, 1, phone.connected());
-    drawBattery(104, 1, phone.phoneBattery());
+
+    drawBattery(109,1, phone.phoneBattery());
+
+
+    // Clock
     Display.centered(34, Font::Huge, phone.timeString());
-    Display.centered(49, Font::Medium, phone.dayString());
-    Display.centered(63, Font::Small, "LaraOS Connected");
+
+    // Day
+    Display.centered(51, Font::Medium, phone.dayString());
+
+    // Bottom Left - Date
+    Display.setFont(Font::Tiny);
+    Display.text(2, 63, phone.dateString());
+
+    // Bottom Right - LaraOS
+    int width = Display.textWidth("LaraOS");
+    Display.text(126 - width, 63, "LaraOS");
 }
 
 void UiManager::drawClipped(int16_t x, int16_t y, const char* text, size_t maxChars)
@@ -126,18 +183,18 @@ void UiManager::drawNavigation()
     const NavigationData& nav = phone.navigation();
 
     //------------------------------------------
-    // Navigation Icon
+    // Navigation Icon (48x48)
     //------------------------------------------
 
     Display.bitmap(
-        0,
-        4,
+        2,
+        2,
         48,
         48,
         NavigationIcons::get(nav.maneuver));
 
     //------------------------------------------
-    // Split Distance
+    // Split distance
     //------------------------------------------
 
     char value[12] = "";
@@ -150,7 +207,7 @@ void UiManager::drawNavigation()
     }
 
     //------------------------------------------
-    // Distance Number
+    // Distance
     //------------------------------------------
 
     Display.setFont(Font::Huge);
@@ -158,12 +215,12 @@ void UiManager::drawNavigation()
     int valueWidth = Display.textWidth(value);
 
     Display.text(
-        118 - valueWidth,
+        124 - valueWidth,
         28,
         value);
 
     //------------------------------------------
-    // Distance Unit
+    // Unit
     //------------------------------------------
 
     Display.setFont(Font::Medium);
@@ -171,19 +228,15 @@ void UiManager::drawNavigation()
     int unitWidth = Display.textWidth(unit);
 
     Display.text(
-        118 - unitWidth,
-        46,
+        124 - unitWidth,
+        45,
         unit);
 
     //------------------------------------------
     // Divider
     //------------------------------------------
 
-    Display.line(
-        0,
-        52,
-        127,
-        52);
+    Display.line(2, 51, 125, 51);
 
     //------------------------------------------
     // Road Name
@@ -191,19 +244,41 @@ void UiManager::drawNavigation()
 
     Display.setFont(Font::Small);
 
-    char road[28];
+    int width = Display.textWidth(nav.road);
 
-    strncpy(
-        road,
-        nav.road,
-        sizeof(road) - 1);
+    if (width <= 122)
+    {
+        // Short road names stay centered
+        Display.centered(
+            63,
+            Font::Small,
+            nav.road);
 
-    road[sizeof(road) - 1] = '\0';
+        roadOffset = 0;
+    }
+    else
+    {
+        // Scroll only long names
+        if (millis() - roadScrollTimer > 70)
+        {
+            roadScrollTimer = millis();
 
-    Display.centered(
-        63,
-        Font::Small,
-        road);
+            roadOffset++;
+
+            if (roadOffset > width + 30)
+                roadOffset = 0;
+        }
+
+        Display.text(
+            124 - roadOffset,
+            63,
+            nav.road);
+
+        Display.text(
+            124 - roadOffset + width + 30,
+            63,
+            nav.road);
+    }
 }
 
 void UiManager::drawCall()

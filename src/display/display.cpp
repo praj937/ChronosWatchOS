@@ -25,7 +25,9 @@ void DisplayManager::setFont(Font font)
         case Font::Small: oled.setFont(u8g2_font_5x8_tf); break;
         case Font::Medium: oled.setFont(u8g2_font_6x12_tf); break;
         case Font::Large: oled.setFont(u8g2_font_logisoso16_tf); break;
-        case Font::Huge: oled.setFont(u8g2_font_logisoso24_tn); break;
+    case Font::Huge:
+    oled.setFont(u8g2_font_logisoso20_tf);
+    break;
     }
 }
 
