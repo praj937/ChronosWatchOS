@@ -1,4 +1,4 @@
-# ChronosWatchOS
+# LaraOS
 
 A modern smartwatch firmware for the ESP32-S3 using ChronosESP32.
 
