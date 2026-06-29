@@ -1,12 +1,13 @@
 #include "app.h"
-#include "services/logger.h"
 
 void App::begin()
 {
-    Logger::info("Application Started");
+    phone.begin();
+    ui.begin();
 }
 
 void App::update()
 {
-
+    phone.update();
+    ui.update();
 }

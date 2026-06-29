@@ -2,37 +2,24 @@
 
 #include <Arduino.h>
 
-//=========================
-// OLED
-//=========================
+namespace WatchConfig
+{
+    constexpr uint16_t DISPLAY_WIDTH = 128;
+    constexpr uint16_t DISPLAY_HEIGHT = 64;
 
-constexpr uint8_t OLED_SDA = 8;
-constexpr uint8_t OLED_SCL = 9;
+    constexpr uint8_t OLED_SDA = 8;
+    constexpr uint8_t OLED_SCL = 9;
 
-constexpr uint32_t OLED_I2C_SPEED = 400000;
+    constexpr uint32_t I2C_SPEED = 400000;
 
-//=========================
-// Display
-//=========================
+    constexpr char WATCH_NAME[] = "LaraOS";
 
-constexpr uint16_t DISPLAY_WIDTH = 128;
-constexpr uint16_t DISPLAY_HEIGHT = 64;
+    constexpr uint32_t CLOCK_REFRESH_MS = 1000;
+    constexpr uint32_t BATTERY_REFRESH_MS = 30000;
+    constexpr uint32_t BOOT_DURATION_MS = 1000;
+    constexpr uint32_t CALL_DURATION_MS = 10000;
+    constexpr uint32_t NOTIFICATION_DURATION_MS = 10000;
+    constexpr uint32_t FRAME_INTERVAL_MS = 80;
 
-//=========================
-// BLE
-//=========================
-
-constexpr char WATCH_NAME[] = "ChronosWatch";
-
-//=========================
-// Refresh
-//=========================
-
-constexpr uint16_t CLOCK_REFRESH = 1000;
-constexpr uint16_t BATTERY_REFRESH = 30000;
-
-//=========================
-// UI
-//=========================
-
-constexpr uint8_t STATUSBAR_HEIGHT = 10;
+    constexpr bool DEBUG_MODE = true;
+}
