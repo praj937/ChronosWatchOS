@@ -3,7 +3,7 @@
 #include "app.h"
 #include "display/display.h"
 
-App app;
+namespace { App app; }
 
 void setup()
 {
@@ -17,4 +17,5 @@ void setup()
 void loop()
 {
     app.update();
+    delay(2);
 }

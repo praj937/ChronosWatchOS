@@ -1,9 +1,6 @@
 #include "display.h"
-
 #include <Wire.h>
-
 #include "config.h"
-#include "version.h"
 
 DisplayManager Display;
 
@@ -11,216 +8,39 @@ void DisplayManager::begin()
 {
     Wire.begin(WatchConfig::OLED_SDA, WatchConfig::OLED_SCL);
     Wire.setClock(WatchConfig::I2C_SPEED);
-
     oled.begin();
-
+    oled.setContrast(255);
     clear();
     present();
 }
 
-void DisplayManager::clear()
-{
-    oled.clearBuffer();
-}
-
-void DisplayManager::present()
-{
-    oled.sendBuffer();
-}
+void DisplayManager::clear() { oled.clearBuffer(); }
+void DisplayManager::present() { oled.sendBuffer(); }
 
 void DisplayManager::setFont(Font font)
 {
-    switch(font)
+    switch (font)
     {
-        case Font::Tiny:
-            oled.setFont(u8g2_font_4x6_tf);
-            break;
-
-        case Font::Small:
-            oled.setFont(u8g2_font_5x8_tf);
-            break;
-
-        case Font::Medium:
-            oled.setFont(u8g2_font_6x12_tf);
-            break;
-
-        case Font::Large:
-            oled.setFont(u8g2_font_logisoso16_tf);
-            break;
-
-        case Font::Huge:
-            // Change this to a bigger font if your U8g2 version supports it
-            // Example:
-            // oled.setFont(u8g2_font_logisoso28_tf);
-            oled.setFont(u8g2_font_logisoso24_tf);
-            break;
+        case Font::Tiny: oled.setFont(u8g2_font_4x6_tf); break;
+        case Font::Small: oled.setFont(u8g2_font_5x8_tf); break;
+        case Font::Medium: oled.setFont(u8g2_font_6x12_tf); break;
+        case Font::Large: oled.setFont(u8g2_font_logisoso16_tf); break;
+        case Font::Huge: oled.setFont(u8g2_font_logisoso24_tn); break;
     }
 }
 
-void DisplayManager::drawText(
-    int x,
-    int y,
-    const char* text)
-{
-    oled.drawStr(x, y, text);
-}
-
-void DisplayManager::drawBitmap(
-    int x,
-    int y,
-    int width,
-    int height,
-    const uint8_t* bitmap)
-{
-    oled.drawXBM(
-        x,
-        y,
-        width,
-        height,
-        bitmap);
-}
-void DisplayManager::drawNavigationBitmap(
-    int x,
-    int y,
-    const uint8_t* bitmap)
-{
-    //----------------------------------------------------
-    // Find icon bounds
-    //----------------------------------------------------
-
-    int minX = 48;
-    int minY = 48;
-    int maxX = 0;
-    int maxY = 0;
-
-    for (int yy = 0; yy < 48; yy++)
-    {
-        for (int xx = 0; xx < 48; xx++)
-        {
-            int byteIndex = xx + (yy / 8) * 48;
-
-            bool pixel =
-                bitmap[byteIndex] &
-                (1 << (yy & 7));
-
-            if (pixel)
-            {
-                if (xx < minX) minX = xx;
-                if (xx > maxX) maxX = xx;
-                if (yy < minY) minY = yy;
-                if (yy > maxY) maxY = yy;
-            }
-        }
-    }
-
-    if (minX > maxX || minY > maxY)
-        return;
-
-    //----------------------------------------------------
-    // Crop size
-    //----------------------------------------------------
-
-    int width  = maxX - minX + 1;
-    int height = maxY - minY + 1;
-
-    //----------------------------------------------------
-    // Scale to almost full 48x48
-    //----------------------------------------------------
-
-    float sx = 42.0f / width;
-    float sy = 42.0f / height;
-
-    float scale = sx < sy ? sx : sy;
-
-    int newW = width * scale;
-    int newH = height * scale;
-
-    int startX = x + (48 - newW) / 2;
-    int startY = y + (48 - newH) / 2;
-
-    //----------------------------------------------------
-    // Draw scaled icon
-    //----------------------------------------------------
-
-    for (int yy = 0; yy < newH; yy++)
-    {
-        for (int xx = 0; xx < newW; xx++)
-        {
-            int srcX = minX + (xx / scale);
-            int srcY = minY + (yy / scale);
-
-            int byteIndex = srcX + (srcY / 8) * 48;
-
-            bool pixel =
-                bitmap[byteIndex] &
-                (1 << (srcY & 7));
-
-            if (pixel)
-            {
-                oled.drawPixel(
-                    startX + xx,
-                    startY + yy);
-            }
-        }
-    }
-}
-
-void DisplayManager::drawCentered(
-    int y,
-    Font font,
-    const char* text)
+void DisplayManager::text(int16_t x, int16_t baseline, const char* value) { oled.drawUTF8(x, baseline, value); }
+void DisplayManager::centered(int16_t baseline, Font font, const char* value)
 {
     setFont(font);
-
-    int width = oled.getStrWidth(text);
-
-    int x = (WatchConfig::DISPLAY_WIDTH - width) / 2;
-
-    oled.drawStr(x, y, text);
+    text((WatchConfig::DISPLAY_WIDTH - oled.getUTF8Width(value)) / 2, baseline, value);
 }
-
-void DisplayManager::drawBluetooth(bool connected)
+void DisplayManager::bitmap(int16_t x, int16_t y, uint8_t w, uint8_t h, const uint8_t* data) { oled.drawXBMP(x, y, w, h, data); }
+void DisplayManager::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1) { oled.drawLine(x0, y0, x1, y1); }
+void DisplayManager::frame(int16_t x, int16_t y, int16_t w, int16_t h) { oled.drawFrame(x, y, w, h); }
+void DisplayManager::box(int16_t x, int16_t y, int16_t w, int16_t h) { oled.drawBox(x, y, w, h); }
+void DisplayManager::disc(int16_t x, int16_t y, int16_t r) { oled.drawDisc(x, y, r); }
+uint16_t DisplayManager::textWidth(const char* value)
 {
-    if (connected)
-    {
-        oled.drawDisc(3, 4, 2);
-    }
-}
-
-void DisplayManager::drawBattery(
-    int x,
-    int y,
-    uint8_t percent)
-{
-    oled.drawFrame(x, y, 14, 7);
-
-    oled.drawBox(x + 14, y + 2, 2, 3);
-
-    int fill = map(percent, 0, 100, 0, 12);
-
-    if (fill > 0)
-    {
-        oled.drawBox(
-            x + 1,
-            y + 1,
-            fill,
-            5);
-    }
-}
-
-void DisplayManager::drawBootScreen()
-{
-    clear();
-
-    drawCentered(
-        36,
-        Font::Huge,
-        "BOOT");
-
-    drawCentered(
-        56,
-        Font::Medium,
-        Version::NUMBER);
-
-    present();
+    return oled.getUTF8Width(value);
 }
