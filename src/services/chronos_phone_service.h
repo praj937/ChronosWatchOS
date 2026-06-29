@@ -28,13 +28,41 @@ public:
 
 private:
 
+    //------------------------------------------------
+    // Chronos
+    //------------------------------------------------
+
     ChronosESP32 watch;
+
+    //------------------------------------------------
+    // Cached Data
+    //------------------------------------------------
 
     NavigationData navData;
 
     CallData callData;
 
+    //------------------------------------------------
+    // Buffers
+    //------------------------------------------------
+
     char timeBuffer[6];
 
     char dayBuffer[12];
+
+    //------------------------------------------------
+    // Callbacks
+    //------------------------------------------------
+
+    static ChronosPhoneService* instance;
+
+    static void ringerCallback(
+        String caller,
+        bool active);
+
+    static void notificationCallback(
+        Notification notification);
+
+    static void connectionCallback(
+        bool connected);
 };

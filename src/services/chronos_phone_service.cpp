@@ -48,47 +48,36 @@ uint8_t ChronosPhoneService::phoneBattery()
 {
     return watch.getPhoneBattery();
 }
-
 NavigationData ChronosPhoneService::navigation()
 {
     Navigation nav = watch.getNavigation();
 
-    // ---------- DEBUG ----------
-    if (nav.active)
-    {
-        Serial.println();
-        Serial.println("========== NAVIGATION ==========");
-
-        Serial.print("Distance   : ");
-        Serial.println(nav.distance);
-
-        Serial.print("Title      : ");
-        Serial.println(nav.title);
-
-        Serial.print("Directions : ");
-        Serial.println(nav.directions);
-
-        Serial.print("Duration   : ");
-        Serial.println(nav.duration);
-
-        Serial.print("ETA        : ");
-        Serial.println(nav.eta);
-
-        Serial.print("Has Icon   : ");
-        Serial.println(nav.hasIcon);
-
-        Serial.println("===============================");
-    }
+    // Reset previous data
+    memset(&navData, 0, sizeof(navData));
 
     navData.active = nav.active;
+
+    if (!nav.active)
+    {
+        return navData;
+    }
+
     navData.hasIcon = nav.hasIcon;
 
+    //--------------------------------------------------
+    // Distance to next turn
+    //--------------------------------------------------
+
     strncpy(
-    navData.distance,
-    nav.title.c_str(),
-    sizeof(navData.distance) - 1);
+        navData.distance,
+        nav.title.c_str(),
+        sizeof(navData.distance) - 1);
 
     navData.distance[sizeof(navData.distance) - 1] = '\0';
+
+    //--------------------------------------------------
+    // Remaining time (kept for future use)
+    //--------------------------------------------------
 
     strncpy(
         navData.remaining,
@@ -97,6 +86,10 @@ NavigationData ChronosPhoneService::navigation()
 
     navData.remaining[sizeof(navData.remaining) - 1] = '\0';
 
+    //--------------------------------------------------
+    // Road name
+    //--------------------------------------------------
+
     strncpy(
         navData.road,
         nav.directions.c_str(),
@@ -104,13 +97,31 @@ NavigationData ChronosPhoneService::navigation()
 
     navData.road[sizeof(navData.road) - 1] = '\0';
 
-    if (nav.hasIcon)
+    //--------------------------------------------------
+    // Navigation icon
+    //--------------------------------------------------
+
+    if (nav.hasIcon && nav.icon != nullptr)
     {
         memcpy(
             navData.icon,
             nav.icon,
             sizeof(navData.icon));
     }
+
+#ifdef DEBUG_NAVIGATION
+    Serial.println();
+    Serial.println("========== NAVIGATION ==========");
+    Serial.print("Distance : ");
+    Serial.println(navData.distance);
+    Serial.print("Road     : ");
+    Serial.println(navData.road);
+    Serial.print("Duration : ");
+    Serial.println(navData.remaining);
+    Serial.print("Icon     : ");
+    Serial.println(navData.hasIcon);
+    Serial.println("================================");
+#endif
 
     return navData;
 }

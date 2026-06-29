@@ -3,7 +3,9 @@
 #include "../display/display.h"
 #include "../services/chronos_phone_service.h"
 
-// Global phone service from app.cpp
+#include <Arduino.h>
+#include <cstdio>
+
 extern ChronosPhoneService Phone;
 
 void HomeScreen::begin()
@@ -18,28 +20,66 @@ void HomeScreen::draw()
 {
     Display.clear();
 
-    // Bluetooth
+    //--------------------------------------------------
+    // Status Bar
+    //--------------------------------------------------
+
     Display.drawBluetooth(Phone.connected());
 
-    // Phone battery
-    char text[8];
-    sprintf(text, "%d", Phone.phoneBattery());
-    Display.drawText(88, 8, text);
+    char battery[8];
+    sprintf(
+        battery,
+        "%d",
+        Phone.phoneBattery());
 
-    // Watch battery (placeholder)
-    Display.drawText(112, 8, "100");
+    Display.setFont(Font::Small);
 
+    Display.drawText(
+        90,
+        8,
+        battery);
+
+    Display.drawText(
+        112,
+        8,
+        "100");
+
+    //--------------------------------------------------
     // Time
+    //--------------------------------------------------
+
     Display.drawCentered(
-        38,
+        34,
         Font::Huge,
         Phone.timeString());
 
+    //--------------------------------------------------
     // Day
+    //--------------------------------------------------
+
     Display.drawCentered(
-        60,
+        50,
         Font::Medium,
         Phone.dayString());
+
+    //--------------------------------------------------
+    // Status
+    //--------------------------------------------------
+
+    if (Phone.connected())
+    {
+        Display.drawCentered(
+            63,
+            Font::Small,
+            "LaraOS Connected");
+    }
+    else
+    {
+        Display.drawCentered(
+            63,
+            Font::Small,
+            "Waiting for Phone...");
+    }
 
     Display.present();
 }

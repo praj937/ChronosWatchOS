@@ -49,6 +49,9 @@ void DisplayManager::setFont(Font font)
             break;
 
         case Font::Huge:
+            // Change this to a bigger font if your U8g2 version supports it
+            // Example:
+            // oled.setFont(u8g2_font_logisoso28_tf);
             oled.setFont(u8g2_font_logisoso24_tf);
             break;
     }
@@ -59,8 +62,9 @@ void DisplayManager::drawText(
     int y,
     const char* text)
 {
-    oled.drawStr(x,y,text);
+    oled.drawStr(x, y, text);
 }
+
 void DisplayManager::drawBitmap(
     int x,
     int y,
@@ -75,22 +79,23 @@ void DisplayManager::drawBitmap(
         height,
         bitmap);
 }
-
 void DisplayManager::drawNavigationBitmap(
     int x,
     int y,
     const uint8_t* bitmap)
 {
-    // Find bounding box of non-empty pixels
+    //----------------------------------------------------
+    // Find icon bounds
+    //----------------------------------------------------
 
     int minX = 48;
     int minY = 48;
     int maxX = 0;
     int maxY = 0;
 
-    for(int yy = 0; yy < 48; yy++)
+    for (int yy = 0; yy < 48; yy++)
     {
-        for(int xx = 0; xx < 48; xx++)
+        for (int xx = 0; xx < 48; xx++)
         {
             int byteIndex = xx + (yy / 8) * 48;
 
@@ -98,44 +103,67 @@ void DisplayManager::drawNavigationBitmap(
                 bitmap[byteIndex] &
                 (1 << (yy & 7));
 
-            if(pixel)
+            if (pixel)
             {
-                if(xx < minX) minX = xx;
-                if(xx > maxX) maxX = xx;
-
-                if(yy < minY) minY = yy;
-                if(yy > maxY) maxY = yy;
+                if (xx < minX) minX = xx;
+                if (xx > maxX) maxX = xx;
+                if (yy < minY) minY = yy;
+                if (yy > maxY) maxY = yy;
             }
         }
     }
 
-    int cropWidth  = maxX - minX + 1;
-    int cropHeight = maxY - minY + 1;
+    if (minX > maxX || minY > maxY)
+        return;
 
-    int offsetX = (48 - cropWidth) / 2;
-    int offsetY = (48 - cropHeight) / 2;
+    //----------------------------------------------------
+    // Crop size
+    //----------------------------------------------------
 
-    for(int yy = minY; yy <= maxY; yy++)
+    int width  = maxX - minX + 1;
+    int height = maxY - minY + 1;
+
+    //----------------------------------------------------
+    // Scale to almost full 48x48
+    //----------------------------------------------------
+
+    float sx = 42.0f / width;
+    float sy = 42.0f / height;
+
+    float scale = sx < sy ? sx : sy;
+
+    int newW = width * scale;
+    int newH = height * scale;
+
+    int startX = x + (48 - newW) / 2;
+    int startY = y + (48 - newH) / 2;
+
+    //----------------------------------------------------
+    // Draw scaled icon
+    //----------------------------------------------------
+
+    for (int yy = 0; yy < newH; yy++)
     {
-        for(int xx = minX; xx <= maxX; xx++)
+        for (int xx = 0; xx < newW; xx++)
         {
-            int byteIndex = xx + (yy / 8) * 48;
+            int srcX = minX + (xx / scale);
+            int srcY = minY + (yy / scale);
+
+            int byteIndex = srcX + (srcY / 8) * 48;
 
             bool pixel =
                 bitmap[byteIndex] &
-                (1 << (yy & 7));
+                (1 << (srcY & 7));
 
-            if(pixel)
+            if (pixel)
             {
                 oled.drawPixel(
-                    x + offsetX + xx - minX,
-                    y + offsetY + yy - minY);
+                    startX + xx,
+                    startY + yy);
             }
         }
     }
 }
-
-
 
 void DisplayManager::drawCentered(
     int y,
@@ -145,17 +173,18 @@ void DisplayManager::drawCentered(
     setFont(font);
 
     int width = oled.getStrWidth(text);
-    
 
     int x = (WatchConfig::DISPLAY_WIDTH - width) / 2;
 
-    oled.drawStr(x,y,text);
+    oled.drawStr(x, y, text);
 }
 
 void DisplayManager::drawBluetooth(bool connected)
 {
-    if(connected)
-        oled.drawDisc(3,4,2);
+    if (connected)
+    {
+        oled.drawDisc(3, 4, 2);
+    }
 }
 
 void DisplayManager::drawBattery(
@@ -163,14 +192,20 @@ void DisplayManager::drawBattery(
     int y,
     uint8_t percent)
 {
-    oled.drawFrame(x,y,14,7);
+    oled.drawFrame(x, y, 14, 7);
 
-    oled.drawBox(x+14,y+2,2,3);
+    oled.drawBox(x + 14, y + 2, 2, 3);
 
-    int fill = map(percent,0,100,0,12);
+    int fill = map(percent, 0, 100, 0, 12);
 
-    if(fill>0)
-        oled.drawBox(x+1,y+1,fill,5);
+    if (fill > 0)
+    {
+        oled.drawBox(
+            x + 1,
+            y + 1,
+            fill,
+            5);
+    }
 }
 
 void DisplayManager::drawBootScreen()
